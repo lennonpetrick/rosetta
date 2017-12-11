@@ -15,16 +15,16 @@ import java.util.Locale;
  * This class detects the application available locales inside the resources based on a string id,
  * it's not so accurate and expects another methodologies. Next release may hold a better algorithms
  * for detecting strings' languages and availability inside apps.
- *
+ * <p>
  * Created by ahmedjazzar on 1/16/16.
  */
 class LocalesDetector {
 
     private final Context mContext;
-    private Logger mLogger;
     private final String TAG = LocalesDetector.class.getName();
+    private Logger mLogger;
 
-    LocalesDetector(Context context)    {
+    LocalesDetector(Context context) {
         this.mContext = context;
         this.mLogger = new Logger(TAG);
     }
@@ -33,7 +33,7 @@ class LocalesDetector {
      * this method takes an experimental string id to see if it's exists in other available
      * locales inside the app than default locale.
      * NOTE: Even if you have a folder named values-ar it doesn't mean you have any resources
-     *      there
+     * there
      *
      * @param stringId experimental string id to discover locales
      * @return the discovered locales
@@ -52,15 +52,15 @@ class LocalesDetector {
         HashSet<Locale> result = new HashSet<>();
         result.add(baseLocale);
 
-        for(String loc : mContext.getAssets().getLocales()) {
-            if(loc.isEmpty()){
+        for (String loc : mContext.getAssets().getLocales()) {
+            if (loc.isEmpty()) {
                 continue;
             }
 
             Locale l;
             boolean referencesUpdateLock = false;
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)  {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 l = Locale.forLanguageTag(loc);
             } else {
                 l = new Locale(loc.substring(0, 2));
@@ -70,15 +70,15 @@ class LocalesDetector {
 
             //TODO: put it in a method
             String tmpString = new Resources(mContext.getAssets(), dm, conf).getString(stringId);
-            for (String reference: references)  {
-                if(reference.equals(tmpString)){
+            for (String reference : references) {
+                if (reference.equals(tmpString)) {
                     // TODO: check its original locale
                     referencesUpdateLock = true;
                     break;
                 }
             }
 
-            if(!referencesUpdateLock)   {
+            if (!referencesUpdateLock) {
                 result.add(l);
                 references.add(tmpString);
             }
@@ -90,16 +90,17 @@ class LocalesDetector {
 
     /**
      * TODO: return the selected one instead
+     *
      * @return application current locale
      */
-    Locale getCurrentLocale()   {
+    Locale getCurrentLocale() {
         return mContext.getResources().getConfiguration().locale;
     }
 
     /**
      * TODO: what if a user didn't provide a closer email at all?
      * TODO: check the closest locale not the first identified
-     *
+     * <p>
      * This method should provide a locale that is close to the given one in the parameter, it's
      * currently checking the language only if in case the detector detects the string in other
      * language.
@@ -107,13 +108,13 @@ class LocalesDetector {
      * @param locale mostly the locale that's not detected or provided
      * @return the index of the most close locale to the given locale. -1 if not detected
      */
-    int detectMostClosestLocale(Locale locale)   {
+    int detectMostClosestLocale(Locale locale) {
 
         mLogger.debug("Start detecting a close locale to: ");
 
         int index = 0;
-        for (Locale loc: LocalesUtils.getLocales()) {
-            if(loc.getDisplayLanguage().equals(locale.getDisplayLanguage()))    {
+        for (Locale loc : LocalesUtils.getLocales()) {
+            if (loc.getDisplayLanguage().equals(locale.getDisplayLanguage())) {
                 mLogger.info("The locale: '" + loc + "' has been detected as a closer locale to: '"
                         + locale + "'");
                 return index;
@@ -128,22 +129,23 @@ class LocalesDetector {
     /**
      * This method validate locales by checking if they are available of they contain wrong letter
      * case and adding the valid ones in a clean set.
+     *
      * @param locales to be checked
      * @return valid locales
      */
-    HashSet<Locale> validateLocales(HashSet<Locale> locales)   {
+    HashSet<Locale> validateLocales(HashSet<Locale> locales) {
 
         mLogger.debug("Validating given locales..");
 
-        for (Locale l:LocalesUtils.getPseudoLocales()) {
-            if(locales.remove(l)) {
+        for (Locale l : LocalesUtils.getPseudoLocales()) {
+            if (locales.remove(l)) {
                 mLogger.info("Pseudo locale '" + l + "' has been removed.");
             }
         }
 
         HashSet<Locale> cleanLocales = new HashSet<>();
         Locale[] androidLocales = Locale.getAvailableLocales();
-        for (Locale locale: locales) {
+        for (Locale locale : locales) {
             if (Arrays.asList(androidLocales).contains(locale)) {
                 cleanLocales.add(locale);
             } else {
